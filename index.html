@@ -3,80 +3,511 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lodenix — Engineering Team</title>
+  <title>Lodenix</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpeg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #1a1a1a;
+      --text: #e5e5e5;
+      --text-dim: #737373;
+      --accent: #22c55e;
+      --accent-glow: rgba(34, 197, 94, 0.15);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 32px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo img {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+
+    .logo span {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ─── HERO ─── */
+    .hero {
+      padding: 120px 0 80px;
+      text-align: center;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 32px;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .hero-tag .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 80px);
+      font-weight: 700;
+      letter-spacing: -3px;
+      line-height: 1;
+      margin-bottom: 24px;
+      animation: slideUp 0.8s ease;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-dim);
+      max-width: 500px;
+      margin: 0 auto;
+      animation: slideUp 0.8s ease 0.1s both;
+    }
+
+    /* ─── TERMINAL ─── */
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 64px 0;
+      animation: slideUp 0.8s ease 0.2s both;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #333;
+    }
+
+    .terminal-dot:nth-child(1) { background: #ff5f56; }
+    .terminal-dot:nth-child(2) { background: #ffbd2e; }
+    .terminal-dot:nth-child(3) { background: #27c93f; }
+
+    .terminal-title {
+      margin-left: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .terminal-body {
+      padding: 24px;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .terminal-body .comment { color: #555; }
+    .terminal-body .cmd { color: var(--accent); }
+    .terminal-body .output { color: var(--text-dim); }
+    .terminal-body .highlight { color: #fbbf24; }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: var(--accent);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+    }
+
+    /* ─── TEAM ─── */
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 64px;
+    }
+
+    .member {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .member:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .member-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .member-role {
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .member-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .member-stack span {
+      padding: 2px 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .member a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 12px;
+      transition: color 0.2s;
+    }
+
+    .member a:hover { color: var(--accent); }
+
+    /* ─── PROJECTS ─── */
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+      margin-bottom: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .project-card:hover { border-color: var(--accent); }
+
+    .project-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .project-desc {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .project-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .project-stack span {
+      padding: 4px 10px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    .project-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+      transition: opacity 0.2s;
+    }
+
+    .project-link:hover { opacity: 0.8; }
+
+    /* ─── STATS ─── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 64px 0;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -2px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    @media (max-width: 640px) {
+      .hero { padding: 80px 0 40px; }
+      .stats { grid-template-columns: 1fr; }
+      .team-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
+  <div class="noise"></div>
+  <div class="grid"></div>
 
-  <h1>Lodenix</h1>
-  <p>A team of 6 engineers building together. Learning, shipping, growing.</p>
-  <p>GitHub: <a href="https://github.com/Lodenix">github.com/Lodenix</a></p>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">
+        <img src="logo.jpeg" alt="Lodenix">
+        <span>lodenix</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="https://github.com/Lodenix">GitHub</a></li>
+        <li><a href="https://github.com/Lodenix/devcollab">DevCollab</a></li>
+      </ul>
+    </nav>
 
-  <hr>
+    <section class="hero">
+      <div class="hero-tag">
+        <span class="dot"></span>
+        shipping together
+      </div>
+      <h1>Lodenix</h1>
+      <p>6 engineers. One codebase. Building real things, learning real skills, getting better every day.</p>
+    </section>
 
-  <h2>The Team</h2>
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <span class="terminal-title">lodenix ~/devcollab</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="comment">// how we work</span></div>
+        <div><span class="cmd">$</span> git checkout -b feature/ship-it</div>
+        <div><span class="output">Switched to a new branch 'feature/ship-it'</span></div>
+        <div><span class="cmd">$</span> npm run lint && npm run build</div>
+        <div><span class="output">✓ All checks passed</span></div>
+        <div><span class="cmd">$</span> gh pr create --reviewer @team</div>
+        <div><span class="output">✓ PR #42 opened — waiting for review</span></div>
+        <div><span class="cmd">$</span> <span class="cursor"></span></div>
+      </div>
+    </div>
 
-  <h3>Hussein Yahaya</h3>
-  <p>Founder &amp; Backend Engineer</p>
-  <p>Stack: Rust, Go, TypeScript, Next.js, Python, Shell, Fortran</p>
-  <p>Tools: Neovim, Linux, Docker</p>
-  <p>Based in Abuja, schooling in Ilorin</p>
-  <p>GitHub: <a href="https://github.com/al-hussein31">github.com/al-hussein31</a></p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-number">6</div>
+        <div class="stat-label">engineers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">2</div>
+        <div class="stat-label">repos</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">commitment</div>
+      </div>
+    </div>
 
-  <h3>Salman Sanusi Sani</h3>
-  <p>Frontend Engineer</p>
-  <p>Stack: HTML, CSS, JavaScript, Python</p>
-  <p>Tools: Linux (Kali), CLI, ZSH</p>
-  <p>Based in Kano</p>
-  <p>GitHub: <a href="https://github.com/salmansanusisani">github.com/salmansanusisani</a></p>
+    <div class="section-label">the team</div>
+    <div class="team-grid">
+      <div class="member">
+        <div class="member-name">Hussein Yahaya</div>
+        <div class="member-role">Founder & Backend</div>
+        <div class="member-stack">
+          <span>Rust</span><span>Go</span><span>TypeScript</span><span>Python</span>
+        </div>
+        <a href="https://github.com/al-hussein31">@al-hussein31</a>
+      </div>
+      <div class="member">
+        <div class="member-name">Salman Sanusi Sani</div>
+        <div class="member-role">Frontend</div>
+        <div class="member-stack">
+          <span>JavaScript</span><span>CSS</span><span>Python</span>
+        </div>
+        <a href="https://github.com/salmansanusisani">@salmansanusisani</a>
+      </div>
+      <div class="member">
+        <div class="member-name">Jibril Qasim</div>
+        <div class="member-role">Backend</div>
+        <div class="member-stack">
+          <span>PHP</span><span>Laravel</span><span>Python</span><span>C++</span>
+        </div>
+        <a href="https://github.com/AbuJulaybeeb">@AbuJulaybeeb</a>
+      </div>
+      <div class="member">
+        <div class="member-name">Muhammad Mustapha</div>
+        <div class="member-role">Frontend</div>
+        <div class="member-stack">
+          <span>React</span><span>Tailwind</span><span>C#</span>
+        </div>
+        <a href="https://github.com/Muhamadmust">@Muhamadmust</a>
+      </div>
+      <div class="member">
+        <div class="member-name">Ibrahim Yusuf</div>
+        <div class="member-role">Frontend</div>
+        <div class="member-stack">
+          <span>MongoDB</span><span>Express</span><span>React</span><span>Node</span>
+        </div>
+        <a href="https://github.com/ibrahimyusuf2616-ai">@ibrahimyusuf2616-ai</a>
+      </div>
+      <div class="member">
+        <div class="member-name">Abdulazeez Shoile</div>
+        <div class="member-role">Full Stack & AI</div>
+        <div class="member-stack">
+          <span>Full Stack</span><span>AI/ML</span>
+        </div>
+        <a href="https://github.com/shoileazeez">@shoileazeez</a>
+      </div>
+    </div>
 
-  <h3>Jibril Qasim (AJDEV)</h3>
-  <p>Backend Engineer</p>
-  <p>Stack: JavaScript, PHP/Laravel, Python, C++, Docker, PostgreSQL, Express</p>
-  <p>Tools: Linux (Ubuntu/GNOME), CLI</p>
-  <p>Aspiring IBM intern</p>
-  <p>GitHub: <a href="https://github.com/AbuJulaybeeb">github.com/AbuJulaybeeb</a></p>
+    <div class="section-label">current project</div>
+    <div class="project-card">
+      <div class="project-name">DevCollab</div>
+      <div class="project-desc">
+        Internal team tool for profiles, chat, task tracking, and contribution tracking.
+        Built as a team learning project practicing real GitHub workflows.
+      </div>
+      <div class="project-stack">
+        <span>Next.js</span><span>Express</span><span>PostgreSQL</span><span>JWT</span>
+      </div>
+      <a href="https://github.com/Lodenix/devcollab" class="project-link">github.com/Lodenix/devcollab →</a>
+    </div>
 
-  <h3>Muhammad Mustapha</h3>
-  <p>Frontend Engineer</p>
-  <p>Stack: HTML, CSS, JavaScript, React, Tailwind, C#</p>
-  <p>Based in Suleja / Minna</p>
-  <p>GitHub: <a href="https://github.com/Muhamadmust">github.com/Muhamadmust</a></p>
-
-  <h3>Ibrahim (Bobby)</h3>
-  <p>Frontend Engineer</p>
-  <p>Stack: MERN (MongoDB, Express, React, Node.js)</p>
-  <p>Based in Abuja</p>
-  <p>GitHub: <a href="https://github.com/ibrahimyusuf2616-ai">github.com/ibrahimyusuf2616-ai</a></p>
-
-  <h3>Abdulazeez Shoile</h3>
-  <p>Full Stack &amp; AI Engineer</p>
-  <p>Stack: Full Stack, AI/ML</p>
-  <p>GitHub: <a href="https://github.com/shoileazeez">github.com/shoileazeez</a></p>
-  <p>LinkedIn: <a href="https://ng.linkedin.com/in/shoile-abdulazeez-8143842ab">linkedin.com/in/shoile-abdulazeez</a></p>
-
-  <hr>
-
-  <h2>Current Project</h2>
-
-  <h3>DevCollab</h3>
-  <p>Internal team tool for profiles, chat, task tracking, and contribution tracking. Built as a team learning project practicing real GitHub workflows.</p>
-  <p>Stack: Next.js, Node/Express, PostgreSQL, JWT auth</p>
-  <p>Repo: <a href="https://github.com/Lodenix/devcollab">github.com/Lodenix/devcollab</a></p>
-
-  <hr>
-
-  <h2>How We Work</h2>
-  <ul>
-    <li>Public repo on GitHub</li>
-    <li>main / dev / feature branch workflow</li>
-    <li>Issues for tasks, PRs for everything</li>
-    <li>At least 1 review before merge</li>
-    <li>GitHub Actions CI (lint + build)</li>
-  </ul>
-
-  <hr>
-
-  <p>Built by Lodenix. 6 engineers, one goal: get better together.</p>
-
+    <footer>
+      Built by <a href="https://github.com/Lodenix">Lodenix</a>. 6 engineers, one goal: get better together.
+    </footer>
+  </div>
 </body>
 </html>
